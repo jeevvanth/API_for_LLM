@@ -1,9 +1,3 @@
-import sys
-
-# Prevent optional sqlite imports from crashing on Vercel
-sys.modules['_sqlite3'] = None
-sys.modules['sqlite3'] = None
-
 import dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import (
