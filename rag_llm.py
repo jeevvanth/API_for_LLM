@@ -1,3 +1,9 @@
+import sys
+
+# Prevent optional sqlite imports from crashing on Vercel
+sys.modules['_sqlite3'] = None
+sys.modules['sqlite3'] = None
+
 import dotenv
 from langchain_groq import ChatGroq
 from langchain_core.prompts import (
@@ -18,9 +24,6 @@ import asyncio
 from langchain_core.runnables import RunnableLambda
 import requests
 import io
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_core.documents import Document
 
 # from fastapi.middleware.cors import CORSMiddleware
 
@@ -34,46 +37,9 @@ chat_model = ChatGroq(
     temperature=0.5
 )
 
-PDF_PATH="data/Jeevanth_Bheeman_.pdf"
-
-CHROMA_PATH="chroma_data/"
 
 
-
-loader = PyPDFLoader(PDF_PATH)
-documents = loader.load()
-
-# 2. Tokenization / Chunking
-# Adjust chunk_size & overlap depending on your use case
-text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=50,
-    separators=["\n\n", "\n", " ", ""]
-)
-docs = [
-    Document(page_content=chunk.page_content, metadata=chunk.metadata)
-    for chunk in text_splitter.split_documents(documents)
-]
-
-# 3. Embedding model
-embedding_model = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
-
-# 4. Store in Chroma
-vector_db = Chroma.from_documents(
-    documents=docs,
-    embedding=embedding_model,
-    persist_directory=CHROMA_PATH
-)
-
-# 5. Persist to disk
-vector_db.persist()
-print(f"Stored {len(docs)} chunks in Chroma at {CHROMA_PATH}")
-
-
-
-
+CHROMA_PATH = "chroma_data/"
 
 system_template_str="""
 You are an job seeker who looks for a job related to AI/ML Engineer,Generative AI Developer,Agentic AI Developer
